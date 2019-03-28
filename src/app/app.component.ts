@@ -1,7 +1,5 @@
-import { CdkDrag, CdkDragStart, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, OnInit, ViewChildren } from '@angular/core';
-import { MatColumnDef } from '@angular/material';
-import { Subscription } from 'rxjs';
+import { CdkDragStart, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Component, OnInit } from '@angular/core';
 
 export interface PeriodicElement {
   name: string;
@@ -29,15 +27,7 @@ const ELEMENT_DATA: PeriodicElement[] = [
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  @ViewChildren(MatColumnDef) viewCols: any;
-
-  moveSubscription: Subscription;
-  dragRef: CdkDrag;
-  dragPreviewEle: any;
-  dragPreviewPos: any;
-  dragColCells: any;
-  cellData: any;
-  origCellStyles: object[] = [];
+  title = 'Material Table column drag and drop';
 
   columns: any[] = [
     { field: 'position' },
@@ -45,85 +35,24 @@ export class AppComponent implements OnInit {
     { field: 'weight' },
     { field: 'symbol' }
   ];
-
   displayedColumns: string[] = [];
   dataSource = ELEMENT_DATA;
 
   previousIndex: number;
-  dragging: any = false;
-
-  title = 'Material Table column drag and drop';
 
   ngOnInit() {
     this.setDisplayedColumns();
   }
 
   setDisplayedColumns() {
-    this.columns.forEach(( item, index) => {
-      item.index = index;
-      this.displayedColumns[index] = item.field;
+    this.columns.forEach(( colunm, index) => {
+      colunm.index = index;
+      this.displayedColumns[index] = colunm.field;
     });
-  }
-
-  setDragColumnCells() {
-    const dragColRef = this.viewCols.find(col => col.name === this.dragRef.data.name);
-    this.dragColCells = dragColRef.cell.template._projectedViews;
-
-    this.cellData = this.getCellElement(this.dragColCells[0]).getBoundingClientRect();
-  }
-
-  applyDragAppearanceToCol() {
-    this.dragColCells.forEach(cell => {
-      Object.assign(this.getCellElement(cell).style, this.generatedCellDragStyles());
-    });
-  }
-
-  clearDragStyles() {
-    this.dragColCells.forEach((cell, i) => {
-      this.getCellElement(cell).removeAttribute('style');
-    });
-  }
-
-  generatedCellDragStyles() {
-    return {
-      position: 'fixed',
-      boxSizing: 'border-box',
-      display: 'flex',
-      alignItems: 'center',
-      left: '0px',
-      width: `${this.cellData.width}px`,
-      height: `${this.cellData.height}px`,
-      transformStyle: 'preserve-3d',
-      backfaceVisibility: 'hidden'
-    };
-  }
-
-  updateDragColPosition() {
-    this.dragColCells.forEach(cell => {
-      const posX = this.dragPreviewPos.left;
-      const newPos = `translate3d(${posX}px, 0, 0)`;
-      const cellEle: HTMLElement = this.getCellElement(cell);
-      cellEle.style.transform = newPos;
-    });
-  }
-
-  getCellElement(cell) {
-    return cell.nodes[0].renderElement;
   }
 
   dragStarted(event: CdkDragStart, index: number ) {
     this.previousIndex = index;
-    this.dragging = event;
-    this.dragRef = event.source;
-    this.setDragColumnCells();
-    this.applyDragAppearanceToCol();
-
-    this.moveSubscription = this.dragRef.moved.subscribe( ( moveData  )  => {
-      const dragPreviewEle = document.body.getElementsByClassName('cdk-drag-preview')[0];
-
-      this.dragPreviewPos = dragPreviewEle.getBoundingClientRect();
-      this.updateDragColPosition();
-    });
   }
 
   dropListDropped(event: CdkDropList, index: number) {
@@ -131,8 +60,5 @@ export class AppComponent implements OnInit {
       moveItemInArray(this.columns, this.previousIndex, index);
       this.setDisplayedColumns();
     }
-    this.dragging = false;
-    this.clearDragStyles();
-    this.moveSubscription.unsubscribe();
   }
 }
