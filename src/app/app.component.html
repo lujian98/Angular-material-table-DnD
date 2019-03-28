@@ -1,23 +1,17 @@
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" cdkDropListGroup>
-
-    <ng-container *ngFor="let column of columns; let i = index" [matColumnDef]="column.field">
-      <th mat-header-cell *matHeaderCellDef
-
-        cdkDropList
-        cdkDropListLockAxis="x"
-        cdkDropListOrientation="horizontal"
-        (cdkDropListDropped)="dropListDropped($event)"
-        cdkDrag
-        (cdkDragStarted)="dragStarted($event, i)"
-        [cdkDragData]="{name: column.field}" >
-
-        {{ column.field }}
-      </th>
-
-      <td mat-cell *matCellDef="let row" > {{ row[column.field] }}  </td>
-    </ng-container>
-
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+<mat-table [dataSource]="dataSource" class="mat-elevation-z8" cdkDropListGroup>
+  <ng-container *ngFor="let column of columns; let i = index" [matColumnDef]="column.field">
+    <mat-header-cell *matHeaderCellDef
+      cdkDropList
+      cdkDropListLockAxis="x"
+      cdkDropListOrientation="horizontal"
+      (cdkDropListDropped)="dropListDropped($event, i)"
+      cdkDrag
+      (cdkDragStarted)="dragStarted($event, i)"
+      [cdkDragData]="{name: column.field, columIndex: i}" >
+      {{ column.field }}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let row" > {{ row[column.field] }}  </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+</mat-table>

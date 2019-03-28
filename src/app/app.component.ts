@@ -1,24 +1,7 @@
-import { Component, OnInit, ViewChildren, HostListener,  } from '@angular/core';
-
-import {
-  moveItemInArray,
-  transferArrayItem,
-  CdkDropList,
-  CdkDragDrop,
-  CdkDragStart,
-  CdkDragEnd,
-  CdkDragEnter,
-  CdkDragExit,
-  CdkDragRelease,
-  CdkDragMove,
-  CdkDrag,
-  DragRef
-} from '@angular/cdk/drag-drop';
-import { MatColumnDef, MatTable, MatCellDef } from '@angular/material';
-import { CdkTable } from '@angular/cdk/table';
-import { Element } from '@angular/compiler/src/render3/r3_ast';
+import { CdkDrag, CdkDragStart, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
+import { Component, OnInit, ViewChildren } from '@angular/core';
+import { MatColumnDef } from '@angular/material';
 import { Subscription } from 'rxjs';
-
 
 export interface PeriodicElement {
   name: string;
@@ -39,7 +22,6 @@ const ELEMENT_DATA: PeriodicElement[] = [
   {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
   {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
 ];
-
 
 @Component({
   selector: 'app-root',
@@ -67,21 +49,19 @@ export class AppComponent implements OnInit {
   displayedColumns: string[] = [];
   dataSource = ELEMENT_DATA;
 
-  dragDropData: any = {};
+  previousIndex: number;
   dragging: any = false;
 
-  title = 'cdk-drag-drop';
+  title = 'Material Table column drag and drop';
 
   ngOnInit() {
     this.setDisplayedColumns();
   }
 
   setDisplayedColumns() {
-    let i = 0;
-    this.columns.forEach(item => {
-      item.idx = i;
-      this.displayedColumns[i] = item.field;
-      i++;
+    this.columns.forEach(( item, index) => {
+      item.index = index;
+      this.displayedColumns[index] = item.field;
     });
   }
 
@@ -123,7 +103,6 @@ export class AppComponent implements OnInit {
       const posX = this.dragPreviewPos.left;
       const newPos = `translate3d(${posX}px, 0, 0)`;
       const cellEle: HTMLElement = this.getCellElement(cell);
-      // cellEle.classList.add('cdk-drag-animating')
       cellEle.style.transform = newPos;
     });
   }
@@ -133,6 +112,7 @@ export class AppComponent implements OnInit {
   }
 
   dragStarted(event: CdkDragStart, index: number ) {
+    this.previousIndex = index;
     this.dragging = event;
     this.dragRef = event.source;
     this.setDragColumnCells();
@@ -144,52 +124,15 @@ export class AppComponent implements OnInit {
       this.dragPreviewPos = dragPreviewEle.getBoundingClientRect();
       this.updateDragColPosition();
     });
-    this.dragDropData = {};
-    this.dragDropData.srcColumnIndex = index;
   }
 
-  dropListDropped(event: any) { // CdkDropList
+  dropListDropped(event: CdkDropList, index: number) {
     if (event) {
-      this.dragDropData.targetColumnIndex = this.getDnDColumIndex(event.container);
-      this.resetDroppedColumn();
+      moveItemInArray(this.columns, this.previousIndex, index);
+      this.setDisplayedColumns();
     }
     this.dragging = false;
     this.clearDragStyles();
     this.moveSubscription.unsubscribe();
-  }
-
-  private getDnDColumIndex(item) {
-    if ( item && item.element && item.element.nativeElement ) {
-      const cellIndex = item.element.nativeElement.cellIndex;
-      return cellIndex;
-    }
-  }
-
-  resetDroppedColumn() {
-    console.log( this.dragDropData );
-    const srcIndex = this.dragDropData.srcColumnIndex;
-    const targetIndex = this.dragDropData.targetColumnIndex;
-    if ( srcIndex !== targetIndex ) {
-      this.columns.forEach(item => {
-        const idx = item.idx;
-        if ( srcIndex > targetIndex ) {
-          if ( idx >= targetIndex && idx < srcIndex ) {
-            item.idx = idx + 1;
-          } else if ( idx ===  srcIndex ) {
-            item.idx = targetIndex;
-          }
-        } else if ( srcIndex < targetIndex ) {
-          if ( idx <= targetIndex && idx > srcIndex ) {
-            item.idx = idx - 1;
-          } else if ( idx ===  srcIndex ) {
-            item.idx = targetIndex;
-          }
-        }
-      });
-      this.columns = this.columns.sort( ( obj1, obj2) => {
-        return obj1.idx - obj2.idx;
-      });
-      this.setDisplayedColumns();
-    }
   }
 }
