@@ -1,6 +1,6 @@
 # AngularMaterialTableDnD
 
-Demo at: https://stackblitz.com/edit/angular-rtfc5v
+Demo at: https://stackblitz.com/edit/angular-yhjtyt
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.6.
 
